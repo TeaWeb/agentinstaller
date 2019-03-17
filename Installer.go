@@ -1,9 +1,11 @@
 package agentinstaller
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/iwind/TeaGo/files"
+	"github.com/iwind/TeaGo/maps"
 	"io/ioutil"
 	"net/http"
 	"os/exec"
@@ -18,6 +20,7 @@ type Installer struct {
 	Master string
 	Id     string
 	Key    string
+	IP     string
 }
 
 func NewInstaller() *Installer {
@@ -56,6 +59,39 @@ func (this *Installer) Start() (isInstalled bool, err error) {
 		}
 	}
 
+	// 检测IP
+	{
+		urlString := this.Master + "/api/agent/ip"
+		req, err := http.NewRequest(http.MethodGet, urlString, nil)
+		if err != nil {
+			return false, err
+		}
+		client := &http.Client{
+			Timeout: 60 * time.Second,
+		}
+		resp, err := client.Do(req)
+		if err != nil {
+			return false, err
+		}
+		defer resp.Body.Close()
+		if resp.StatusCode != http.StatusOK {
+			return false, errors.New("'" + urlString + "' respond a invalid status code:" + fmt.Sprintf("%d", resp.StatusCode))
+		}
+
+		data, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return false, err
+		}
+
+		m := maps.Map{}
+		err = json.Unmarshal(data, &m)
+		if err != nil {
+			return false, err
+		}
+
+		this.IP = m.GetString("ip")
+	}
+
 	// 下载
 	{
 		urlString := this.Master + "/api/agent/upgrade"
@@ -91,7 +127,7 @@ func (this *Installer) Start() (isInstalled bool, err error) {
 		}
 
 		// 目录是否存在
-		targetDir := this.Dir + "/teaweb-agent"
+		targetDir := this.Dir + "/agent"
 		for _, subDir := range []string{"bin", "configs", "configs/agents", "logs", "plugins"} {
 			subFile := files.NewFile(targetDir + "/" + subDir)
 			if subDir == "bin" && subFile.Exists() {

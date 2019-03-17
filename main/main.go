@@ -31,11 +31,13 @@ func main() {
 		fmt.Print(stringutil.JSONEncode(maps.Map{
 			"isInstalled": isInstalled,
 			"err":         err.Error(),
+			"ip":          installer.IP,
 		}))
 	} else {
 		fmt.Print(stringutil.JSONEncode(maps.Map{
 			"isInstalled": isInstalled,
 			"err":         nil,
+			"ip":          installer.IP,
 		}))
 	}
 }
