@@ -67,7 +67,7 @@ func (this *Installer) Start() (isInstalled bool, err error) {
 			return false, err
 		}
 		client := &http.Client{
-			Timeout: 60 * time.Second,
+			Timeout: 10 * time.Second,
 		}
 		resp, err := client.Do(req)
 		if err != nil {
