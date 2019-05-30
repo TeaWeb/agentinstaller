@@ -1,6 +1,7 @@
 package agentinstaller
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -48,6 +49,11 @@ func (this *Installer) Start() (isInstalled bool, err error) {
 		}
 		client := &http.Client{
 			Timeout: 10 * time.Second,
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{
+					InsecureSkipVerify: true,
+				},
+			},
 		}
 		resp, err := client.Do(req)
 		if err == nil {
@@ -68,6 +74,11 @@ func (this *Installer) Start() (isInstalled bool, err error) {
 		}
 		client := &http.Client{
 			Timeout: 10 * time.Second,
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{
+					InsecureSkipVerify: true,
+				},
+			},
 		}
 		resp, err := client.Do(req)
 		if err != nil {
@@ -105,7 +116,12 @@ func (this *Installer) Start() (isInstalled bool, err error) {
 		req.Header.Set("Tea-Agent-Os", runtime.GOOS)
 		req.Header.Set("Tea-Agent-Arch", runtime.GOARCH)
 		client := &http.Client{
-			Timeout: 60 * time.Second,
+			Timeout: 120 * time.Second,
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{
+					InsecureSkipVerify: true,
+				},
+			},
 		}
 		resp, err := client.Do(req)
 		if err != nil {
