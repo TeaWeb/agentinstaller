@@ -1,4 +1,4 @@
-package agentinstaller
+package installers
 
 import (
 	"crypto/tls"
